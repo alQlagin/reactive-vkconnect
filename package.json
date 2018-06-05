@@ -28,7 +28,7 @@
     "release": "standard-version",
     "postrelease": "npm run release:github && npm run release:npm",
     "release:github": "git push --no-verify --follow-tags origin master",
-    "release:npm": "npm publish --public-access",
+    "release:npm": "npm publish --access public",
     "release:preflight": "irish-pub",
     "release:preflight:package": "npm pack"
   },

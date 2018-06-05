@@ -5,8 +5,8 @@ import { EmptyBridgeAdapter } from './empty-bridge-adapter'
 import { IosBridgeAdapter } from './ios-bridge-adapter'
 
 export class VkConnect implements BridgeAdapter {
-  readonly deviceBridge: BridgeAdapter;
-  private event$ = new Subject<CustomEvent>();
+  readonly deviceBridge: BridgeAdapter
+  private event$ = new Subject<CustomEvent>()
 
   constructor(winRef: Window & any) {
     if (!winRef) {
