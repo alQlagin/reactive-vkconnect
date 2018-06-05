@@ -1,8 +1,8 @@
-import { fromEvent, Observable } from "rxjs";
-import { BridgeAdapter } from "../interfaces/bridge-adapter";
-import { AndroidBridgeAdapter } from "./android-bridge-adapter";
-import { EmptyBridgeAdapter } from "./empty-bridge-adapter";
-import { IosBridgeAdapter } from "./ios-bridge-adapter";
+import { fromEvent, Observable } from 'rxjs';
+import { BridgeAdapter } from '../interfaces/bridge-adapter';
+import { AndroidBridgeAdapter } from './android-bridge-adapter';
+import { EmptyBridgeAdapter } from './empty-bridge-adapter';
+import { IosBridgeAdapter } from './ios-bridge-adapter';
 
 export class VkConnect implements BridgeAdapter {
   readonly deviceBridgeAdapter: BridgeAdapter;
@@ -22,7 +22,7 @@ export class VkConnect implements BridgeAdapter {
       this.deviceBridgeAdapter = new EmptyBridgeAdapter();
     }
 
-    this.events = fromEvent(winRef, "VKWebAppEvent");
+    this.events = fromEvent(winRef, 'VKWebAppEvent');
   }
 
   send(handler: string, params: any = {}): void {
