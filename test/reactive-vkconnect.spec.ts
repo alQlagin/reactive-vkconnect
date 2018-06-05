@@ -1,9 +1,9 @@
 import { VkConnect } from "../src";
+import { BridgeAdapter } from "../src/interfaces/bridge-adapter";
 import { EmptyBridgeAdapter } from "../src/classes/empty-bridge-adapter";
 import { AndroidBridgeAdapter } from "../src/classes/android-bridge-adapter";
 import { IosBridgeAdapter } from "../src/classes/ios-bridge-adapter";
 import { Observable } from "rxjs";
-import SpyInstance = jest.SpyInstance;
 
 test('VkConnect exported', () => {
   expect(VkConnect).toBeDefined();
@@ -16,24 +16,34 @@ test('VkConnect throws error if window undefined', () => {
 describe('VkConnect deviceBridge defined correct', () => {
   test('empty device bridge', () => {
     const vkConnect = new VkConnect({});
-    expect(vkConnect.deviceBridge).toBeInstanceOf(EmptyBridgeAdapter);
+    expect(vkConnect.deviceBridgeAdapter).toBeInstanceOf(EmptyBridgeAdapter);
   });
   test('android device bridge', () => {
     const vkConnect = new VkConnect({ AndroidBridge: true });
-    expect(vkConnect.deviceBridge).toBeInstanceOf(AndroidBridgeAdapter);
+    expect(vkConnect.deviceBridgeAdapter).toBeInstanceOf(AndroidBridgeAdapter);
   });
   test('empty device bridge', () => {
     const vkConnect = new VkConnect({ webkit: { messageHandlers: {} } });
-    expect(vkConnect.deviceBridge).toBeInstanceOf(IosBridgeAdapter);
+    expect(vkConnect.deviceBridgeAdapter).toBeInstanceOf(IosBridgeAdapter);
+  });
+  test("specified adapter set correct", () => {
+    const adapter: BridgeAdapter = {
+      send: jest.fn(),
+      supports: jest.fn()
+    };
+    const vkConnect = new VkConnect(window, adapter);
+    expect(vkConnect.deviceBridgeAdapter).toEqual(adapter);
   });
 });
 
 describe('When VkConnect created', () => {
   let connect: VkConnect;
-  let sendSpy: SpyInstance;
+  const adapter: BridgeAdapter = {
+    send: jest.fn(),
+    supports: jest.fn()
+  };
   beforeEach(() => {
-    connect = new VkConnect(window);
-    sendSpy = jest.spyOn(connect.deviceBridge, 'send');
+    connect = new VkConnect(window, adapter);
   });
 
   describe('create event stream', () => {
@@ -56,6 +66,6 @@ describe('When VkConnect created', () => {
     const handler = 'test handler';
     const data = 'test data';
     connect.send(handler, data);
-    expect(sendSpy).toBeCalledWith(handler, data);
+    expect(adapter.send).toBeCalledWith(handler, data);
   });
 });

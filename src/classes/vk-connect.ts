@@ -5,29 +5,31 @@ import { EmptyBridgeAdapter } from "./empty-bridge-adapter";
 import { IosBridgeAdapter } from "./ios-bridge-adapter";
 
 export class VkConnect implements BridgeAdapter {
-  readonly deviceBridge: BridgeAdapter;
+  readonly deviceBridgeAdapter: BridgeAdapter;
   readonly events: Observable<CustomEvent>;
 
-  constructor(winRef: Window & any) {
+  constructor(winRef: Window & any, adapter?: BridgeAdapter) {
     if (!winRef) {
       throw Error('window object required');
     }
-    if (winRef.AndroidBridge) {
-      this.deviceBridge = new AndroidBridgeAdapter(winRef.AndroidBridge);
+    if (adapter) {
+      this.deviceBridgeAdapter = adapter;
+    } else if (winRef.AndroidBridge) {
+      this.deviceBridgeAdapter = new AndroidBridgeAdapter(winRef.AndroidBridge);
     } else if (winRef && winRef.webkit && winRef.webkit.messageHandlers) {
-      this.deviceBridge = new IosBridgeAdapter(winRef.webkit.messageHandlers);
+      this.deviceBridgeAdapter = new IosBridgeAdapter(winRef.webkit.messageHandlers);
     } else {
-      this.deviceBridge = new EmptyBridgeAdapter();
+      this.deviceBridgeAdapter = new EmptyBridgeAdapter();
     }
 
     this.events = fromEvent(winRef, "VKWebAppEvent");
   }
 
   send(handler: string, params: any = {}): void {
-    this.deviceBridge.send(handler, params);
+    this.deviceBridgeAdapter.send(handler, params);
   }
 
   supports(handler: string) {
-    return this.deviceBridge.supports(handler);
+    return this.deviceBridgeAdapter.supports(handler);
   }
 }
