@@ -40,7 +40,7 @@ var subscription = connect.events
     // subscribe to start listening events
     .subscribe(
         // success
-        (event: CustomEvent) => console.log(event),
+        (event) => console.log(event),
         // during subscription, stops subscription
         (err) => handleError(err),
         // subscription completed
@@ -54,27 +54,44 @@ subscription.unsubscribe();
 ## Example
 
 ```
-import {map, filter} from 'rxjs/operators';
-// some code ....
-const GetAuthTokenResponse = connect.events
-    .pipe(
-        // restricts only specified events
-        filter(event =>
-            event.type === 'VKWebAppAccessTokenReceived' ||
-            'VKWebAppAccessTokenFailed'
-        ),
-        // expract data from event
-        map(event => {
-           if (event.type === 'VKWebAppAccessTokenReceived') return event.detail;
-           else throw event.detail;
-        }),
-        // unsuscribes when firts data received
-        take(1)
-    );
+var adapter = {
+  send: (handler, data) => {
+    if (handler === 'VKWebAppGetAuthToken' ){
+      log(`[EVENT DISPATCHED] VKWebAppGetAuthToken: ${JSON.stringify(data)}`);
+      event = new CustomEvent('VKWebAppEvent', {
+        detail: {
+          type: 'VKWebAppAccessTokenReceived',
+          data: {'authentication_token': `${data.app_id}${data.scope}`}
+        }
+      });
+      window.dispatchEvent(event);
+    }
+  }
+};
+var connect = new ReactiveVkconnect.VkConnect(window, adapter);
+var  GetAuthTokenResponse = connect.events
+  .pipe(
+    // restricts only specified events
+    filter(event =>
+      event.type === 'VKWebAppAccessTokenReceived' ||
+      'VKWebAppAccessTokenFailed'
+    ),
+    // extract data from event
+    map(event => {
+      var {type, data} = event.detail;
+      if (type === 'VKWebAppAccessTokenReceived') return {name: type, data};
+      else throw {name: type, data};
+    }),
+    // unsubscribe when first data received
+    take(1)
+  );
+
+GetAuthTokenResponse.subscribe(
+  event => log(`[SUCCESS] ${event.name}: ${JSON.stringify(event.data)}`),
+  event => log(`[ERROR] ${event.name}: ${JSON.stringify(event.data)}`),
+  () => log('[COMPLETE]')
+);
 
 connect.send('VKWebAppGetAuthToken', {"app_id": 6217559, "scope": "notify,friends"});
-GetAuthTokenResponse.subscribe(
-    data => console.log(data.access_token),
-    error => console.error(error.error_description)
-)
+
 ```

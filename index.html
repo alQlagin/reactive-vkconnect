@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="log"></div>
+<script src="umd/reactive-vkconnect.min.js"></script>
+<script src="node_modules/rxjs/bundles/rxjs.umd.min.js"></script>
+<script>
+  var adapter = {
+    send: (handler, data) => {
+      if (handler === "VKWebAppGetAuthToken") {
+        log(`[EVENT DISPATCHED] VKWebAppGetAuthToken: ${JSON.stringify(data)}`);
+        event = new CustomEvent("VKWebAppEvent", {
+          detail: {
+            type: "VKWebAppAccessTokenReceived",
+            data: { "authentication_token": `${data.app_id}${data.scope}` }
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    }
+  };
+  var connect = new ReactiveVkconnect.VkConnect(window, adapter);
+  var { filter, map, take } = rxjs.operators;
+  var GetAuthTokenResponse = connect.events
+    .pipe(
+      // restricts only specified events
+      filter(event =>
+        event.type === "VKWebAppAccessTokenReceived" ||
+        "VKWebAppAccessTokenFailed"
+      ),
+      // extract data from event
+      map(event => {
+        var { type, data } = event.detail;
+        if (type === "VKWebAppAccessTokenReceived") return { name: type, data };
+        else throw { name: type, data };
+      }),
+      // unsubscribe when first data received
+      take(1)
+    );
+
+  GetAuthTokenResponse.subscribe(
+    event => log(`[SUCCESS] ${event.name}: ${JSON.stringify(event.data)}`),
+    event => log(`[ERROR] ${event.name}: ${JSON.stringify(event.data)}`),
+    () => log("[COMPLETE]")
+  );
+
+  connect.send("VKWebAppGetAuthToken", { "app_id": 6217559, "scope": "notify,friends" });
+
+  function log(text) {
+    var p = document.createElement("p");
+    p.innerText = text;
+    document.getElementById("log").appendChild(p);
+  }
+</script>
+</body>
+</html>
