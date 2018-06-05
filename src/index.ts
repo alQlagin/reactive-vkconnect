@@ -1,1 +1,1 @@
-export { VkConnect } from './classes/vk-connect'
+export { VkConnect } from './classes/vk-connect';

@@ -1,6 +1,6 @@
 {
   "name": "@shtrihpunktir/reactive-vkconnect",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "RxJs adaptation for @vkontakte/vkui-connect\r ===========================================",
   "main": "umd/reactive-vkconnect.js",
   "module": "lib/index.js",
