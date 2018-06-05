@@ -1,21 +1,10 @@
-import { VkConnect } from '../src';
-import { EmptyBridgeAdapter } from '../src/classes/empty-bridge-adapter';
-import { AndroidBridgeAdapter } from '../src/classes/android-bridge-adapter';
-import { IosBridgeAdapter } from '../src/classes/ios-bridge-adapter';
-import { Observable } from 'rxjs';
+import { VkConnect } from "../src";
+import { EmptyBridgeAdapter } from "../src/classes/empty-bridge-adapter";
+import { AndroidBridgeAdapter } from "../src/classes/android-bridge-adapter";
+import { IosBridgeAdapter } from "../src/classes/ios-bridge-adapter";
+import { Observable } from "rxjs";
+import SpyInstance = jest.SpyInstance;
 
-jest.doMock('../src/classes/empty-bridge-adapter');
-let winMock: Window & any;
-beforeEach(() => {
-  winMock = { ...window, _$_listeners: {} } as Window;
-  winMock.addEventListener = jest.fn(function(event, fn) {
-    this._$_listeners[event] = fn;
-  });
-
-  winMock.dispatchEvent = jest.fn(function(event: Event) {
-    this._$_listeners[event.type](event);
-  });
-});
 test('VkConnect exported', () => {
   expect(VkConnect).toBeDefined();
 });
@@ -26,28 +15,24 @@ test('VkConnect throws error if window undefined', () => {
 
 describe('VkConnect deviceBridge defined correct', () => {
   test('empty device bridge', () => {
-    const vkConnect = new VkConnect(winMock);
+    const vkConnect = new VkConnect({});
     expect(vkConnect.deviceBridge).toBeInstanceOf(EmptyBridgeAdapter);
   });
   test('android device bridge', () => {
-    winMock.AndroidBridge = true;
-    const vkConnect = new VkConnect(winMock);
+    const vkConnect = new VkConnect({ AndroidBridge: true });
     expect(vkConnect.deviceBridge).toBeInstanceOf(AndroidBridgeAdapter);
   });
   test('empty device bridge', () => {
-    winMock.webkit = {
-      messageHandlers: {},
-    };
-    const vkConnect = new VkConnect(winMock);
+    const vkConnect = new VkConnect({ webkit: { messageHandlers: {} } });
     expect(vkConnect.deviceBridge).toBeInstanceOf(IosBridgeAdapter);
   });
 });
 
 describe('When VkConnect created', () => {
-  let connect;
-  let sendSpy;
+  let connect: VkConnect;
+  let sendSpy: SpyInstance;
   beforeEach(() => {
-    connect = new VkConnect(winMock);
+    connect = new VkConnect(window);
     sendSpy = jest.spyOn(connect.deviceBridge, 'send');
   });
 
@@ -63,7 +48,7 @@ describe('When VkConnect created', () => {
         expect(e.detail).toBe(eventDetail);
         done();
       }, done);
-      (winMock as Window).dispatchEvent(event);
+      window.dispatchEvent(event);
     });
   });
 
