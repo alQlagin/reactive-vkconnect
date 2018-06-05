@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 <a name="0.0.1"></a>
+## [0.0.1](https://github.com/alQlagin/reactive-vkconnect/compare/v0.1.0...v0.0.1) (2018-06-05)
+
+
+### Bug Fixes
+
+* scripts section ([4f469a0](https://github.com/alQlagin/reactive-vkconnect/commit/4f469a0))
+
+
+
+<a name="0.0.1"></a>
 ## 0.0.1 (2018-06-05)
 
 
